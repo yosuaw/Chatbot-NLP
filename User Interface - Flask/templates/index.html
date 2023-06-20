@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group 5 Chatbot</title>
+    <link rel="shortcut icon" href="{{url_for('static', filename='favicon.png')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- chat box -->
+        <div class="chat-box">
+            <!-- client -->
+            <div class="client">
+                <img src="{{url_for('static', filename='logo.jpg')}}" alt="logo" />
+                <div class="client-info">
+                    <h2>Chatbot</h2>
+                    <p>online</p>
+                </div>
+            </div>
+
+            <!-- main chat section -->
+            <div class="chats" style="overflow-y: scroll !important; height:320px !important;">
+                <div class="bot-chat">Halo, saya adalah chatbot dari kelompok 5. Coba beri aku pertanyaan :D</div>
+            </div>
+
+            <!-- input field section -->
+            <div class="chat-input">
+                <input type="text" placeholder="Enter Message" id="user_input" autofocus/>
+                <button class="send-btn" id="btnEnter">
+                    <img src="{{url_for('static', filename='send.png')}}" alt="send-btn">
+                </button>
+            </div>
+        </div>
+
+        <!-- button -->
+        <div class="chat-btn">
+            <img src="{{url_for('static', filename='Circle-icons-chat.svg.png')}}" alt="chat box icon btn">
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='jquery-3.4.1.min.js') }}"></script>
+    <script type="text/javascript">
+        $(".chat-btn").click(() => {
+            $(".chat-box").slideToggle("slow");
+        })
+        
+        $('#user_input').keypress(function(event){ 
+            var id = event.key || event.which || event.keyCode || 0;   
+            if (id == 'Enter') {
+                $("#btnEnter").click();
+            }
+        });
+
+        $("#btnEnter").click(function() {
+            var msg = $("#user_input").val();
+            
+            if(msg != "") {
+                $("#user_input").val('');
+                $('.chats').append("<div class='my-chat'>"+msg+"</div>");
+                $.ajax({
+                    type:'POST',
+                    url:'{{url_for("result")}}',
+                    data : {'user_input':msg},
+                    success:function(data) {
+                        $(".chats").append('<div class="bot-chat">'+data.result+'</div>');
+                        if(data.extra)
+                            $(".chats").append('<div class="bot-chat">'+data.extra+'</div>');
+                        else {
+                            setTimeout(function() {
+                                $(".chats").html("");
+                                $(".chat-btn").click();
+                                $(".chats").html(`<div class="bot-chat">Halo, saya adalah chatbot dari kelompok 5. Coba beri aku pertanyaan :D</div>`);
+                            }, 2000);
+                        }
+
+                        const elements = document.getElementsByClassName("bot-chat");
+                        var element = elements.item(elements.length-1);
+                        element.scrollIntoView();
+                        $("#user_input").focus();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
